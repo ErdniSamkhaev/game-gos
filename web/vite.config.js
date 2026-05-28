@@ -3,6 +3,10 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
+  // Относительные пути к ассетам, чтобы один и тот же билд работал и на
+  // GitHub Pages (в подкаталоге /<repo>/), и на Timeweb/Beget (в корне домена).
+  // Вместе с hash-роутером это даёт полностью портативную статику.
+  base: "./",
   plugins: [vue()],
   resolve: {
     alias: {

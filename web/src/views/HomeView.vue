@@ -9,10 +9,20 @@ const progress = useProgressStore();
 const srs = useSrsStore();
 
 const totalQ = computed(() => qs.all.length);
+// «Освоено» считаем только от заданий, которые реально будут на экзамене.
+const examTotal = computed(() => qs.examPool.length);
 const knownPct = computed(() => {
-  if (!totalQ.value) return 0;
-  return Math.round((Object.keys(progress.answeredCorrect).length / totalQ.value) * 100);
+  if (!examTotal.value) return 0;
+  const knownExam = Object.keys(progress.answeredCorrect)
+    .filter((id) => qs.isExamQuestion(id)).length;
+  return Math.round((knownExam / examTotal.value) * 100);
 });
+const dueExamCount = computed(
+  () => srs.dueIds.filter((id) => qs.isExamQuestion(id)).length,
+);
+const examMistakesCount = computed(
+  () => progress.mistakeIds.filter((id) => qs.isExamQuestion(id)).length,
+);
 </script>
 
 <template>
@@ -24,8 +34,8 @@ const knownPct = computed(() => {
   <div class="card">
     <div class="row between wrap">
       <div>
-        <div class="muted" style="font-size: 13px;">Всего вопросов в базе</div>
-        <div style="font-size: 28px; font-weight: 600;">{{ totalQ }}</div>
+        <div class="muted" style="font-size: 13px;">Заданий для экзамена</div>
+        <div style="font-size: 28px; font-weight: 600;">{{ examTotal }}</div>
       </div>
       <div>
         <div class="muted" style="font-size: 13px;">Освоено</div>
@@ -33,7 +43,7 @@ const knownPct = computed(() => {
       </div>
       <div>
         <div class="muted" style="font-size: 13px;">К повторению сегодня</div>
-        <div style="font-size: 28px; font-weight: 600;">{{ srs.dueCount }}</div>
+        <div style="font-size: 28px; font-weight: 600;">{{ dueExamCount }}</div>
       </div>
       <div>
         <div class="muted" style="font-size: 13px;">Серия дней</div>
@@ -52,8 +62,9 @@ const knownPct = computed(() => {
     <div style="margin-bottom: 12px;">
       <h3>Экзамен</h3>
       <p class="muted" style="margin: 4px 0 8px;">
-        14 заданий: 5 закрытых + 5 на соответствие/последовательность + 4 открытых.
-        Пропорционально по 5 дисциплинам. Таймер 90 минут. Результат в конце.
+        22 задания: ~14 одиночных + 3–4 с несколькими ответами + 4 на
+        соответствие/последовательность. Пропорционально по 5 дисциплинам.
+        Таймер 90 минут. Результат в конце.
       </p>
       <RouterLink to="/exam" class="btn primary">Начать экзамен</RouterLink>
     </div>
@@ -67,7 +78,7 @@ const knownPct = computed(() => {
     </div>
 
     <div style="margin-bottom: 12px;">
-      <h3>Повторения <span v-if="srs.dueCount > 0" class="pill matching">{{ srs.dueCount }}</span></h3>
+      <h3>Повторения <span v-if="dueExamCount > 0" class="pill matching">{{ dueExamCount }}</span></h3>
       <p class="muted" style="margin: 4px 0 8px;">
         Карточки с интервальным повторением (SM-2). Лучший способ удержать в памяти.
       </p>
@@ -75,7 +86,7 @@ const knownPct = computed(() => {
     </div>
 
     <div style="margin-bottom: 12px;">
-      <h3>Работа над ошибками <span class="pill error" v-if="progress.mistakeIds.length">{{ progress.mistakeIds.length }}</span></h3>
+      <h3>Работа над ошибками <span class="pill error" v-if="examMistakesCount">{{ examMistakesCount }}</span></h3>
       <p class="muted" style="margin: 4px 0 8px;">
         Только те вопросы, в которых вы ошибались.
       </p>
@@ -94,10 +105,13 @@ const knownPct = computed(() => {
 
   <div class="card">
     <h2>Дисциплины</h2>
+    <p class="muted" style="font-size: 13px; margin-top: 0;">
+      Количество — задания, которые могут попасться на экзамене (открытые исключены).
+    </p>
     <ol style="padding-left: 20px;">
-      <li v-for="d in qs.disciplines" :key="d.num">
+      <li v-for="d in qs.examDisciplines" :key="d.num">
         <strong>{{ d.name }}</strong>
-        <span class="muted" style="font-size: 13px;"> · {{ d.count }} вопросов</span>
+        <span class="muted" style="font-size: 13px;"> · {{ d.count }} заданий</span>
       </li>
     </ol>
   </div>

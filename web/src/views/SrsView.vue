@@ -15,9 +15,18 @@ const srs = useSrsStore();
 const setupOpen = ref(true);
 const checked = ref(false);
 
+// SRS-карточки, оставшиеся в localStorage от старых открытых заданий,
+// больше не нужны (их нет на экзамене). Фильтруем их и здесь, и при старте.
+const dueExamIds = computed(() =>
+  srs.dueIds.filter((id) => qs.isExamQuestion(id)),
+);
+const totalExamCards = computed(
+  () => Object.keys(srs.cards).filter((id) => qs.isExamQuestion(id)).length,
+);
+
 function start() {
-  if (srs.dueIds.length === 0) return;
-  exam.startSrs(srs.dueIds);
+  if (dueExamIds.value.length === 0) return;
+  exam.startSrs(dueExamIds.value);
   setupOpen.value = false;
   checked.value = false;
 }
@@ -87,17 +96,17 @@ function formatCorrect(q) {
       <div class="row between wrap">
         <div>
           <div class="muted" style="font-size: 13px;">К повторению сегодня</div>
-          <div style="font-size: 40px; font-weight: 700;">{{ srs.dueCount }}</div>
+          <div style="font-size: 40px; font-weight: 700;">{{ dueExamIds.length }}</div>
         </div>
         <div>
           <div class="muted" style="font-size: 13px;">Всего карточек в SRS</div>
-          <div style="font-size: 40px; font-weight: 700;">{{ srs.totalCards }}</div>
+          <div style="font-size: 40px; font-weight: 700;">{{ totalExamCards }}</div>
         </div>
       </div>
-      <button class="btn primary" :disabled="srs.dueCount === 0" @click="start">
-        {{ srs.dueCount === 0 ? 'Сегодня всё повторено' : 'Начать повторение' }}
+      <button class="btn primary" :disabled="dueExamIds.length === 0" @click="start">
+        {{ dueExamIds.length === 0 ? 'Сегодня всё повторено' : 'Начать повторение' }}
       </button>
-      <p v-if="srs.totalCards === 0" class="muted" style="margin-top: 12px;">
+      <p v-if="totalExamCards === 0" class="muted" style="margin-top: 12px;">
         Карточки появятся после первых ответов в любом режиме.
       </p>
     </div>

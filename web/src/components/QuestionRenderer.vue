@@ -4,6 +4,7 @@ import ClosedQuestion from "@/components/ClosedQuestion.vue";
 import MatchingQuestion from "@/components/MatchingQuestion.vue";
 import SequenceQuestion from "@/components/SequenceQuestion.vue";
 import OpenQuestion from "@/components/OpenQuestion.vue";
+import QuestionHint from "@/components/QuestionHint.vue";
 import { validateQuestion, highestLevel } from "@/lib/validate";
 
 const props = defineProps({
@@ -13,6 +14,7 @@ const props = defineProps({
   showFeedback: { type: Boolean, default: false },
   locked: { type: Boolean, default: false },
   mistakeCount: { type: Number, default: 0 },
+  allowHints: { type: Boolean, default: true },
 });
 defineEmits(["update:answer", "update:selfGrade"]);
 
@@ -55,6 +57,14 @@ const worst = computed(() => highestLevel(issues.value));
 
     <div class="statement">{{ question.statement }}</div>
 
+    <QuestionHint
+      :question="question"
+      :mistake-count="mistakeCount"
+      :show-feedback="showFeedback"
+      :locked="locked"
+      :enabled="allowHints"
+    />
+
     <ClosedQuestion
       v-if="question.type === 'single' || question.type === 'multi'"
       :question="question"
@@ -86,7 +96,6 @@ const worst = computed(() => highestLevel(issues.value));
       :self-grade="selfGrade"
       :show-feedback="showFeedback"
       :locked="locked"
-      :mistake-count="mistakeCount"
       @update:model-value="$emit('update:answer', $event)"
       @update:self-grade="$emit('update:selfGrade', $event)"
     />

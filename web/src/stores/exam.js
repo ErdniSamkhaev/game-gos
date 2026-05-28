@@ -1,7 +1,20 @@
 import { defineStore } from "pinia";
-import { useQuestionsStore } from "@/stores/questions";
+import { useQuestionsStore, EXAM_TYPES } from "@/stores/questions";
 
 const EXAM_DURATION_S = 90 * 60;
+
+// Состав билета по официальной справке: всего 22 задания.
+// — multi: 3 или 4 (выбирается случайно каждый запуск экзамена)
+// — matching/sequence: 4 из общего пула
+// — single: остальные (т.е. 14 или 15 в зависимости от multi)
+// — open: 0 (по новой версии экзамена открытые задания не упоминались)
+export const EXAM_TICKET = {
+  total: 22,
+  multiMin: 3,
+  multiMax: 4,
+  setCount: 4,
+  openCount: 0,
+};
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -13,6 +26,7 @@ function shuffle(arr) {
 }
 
 function pickProportional(pool, types, total) {
+  if (total <= 0) return [];
   const filtered = pool.filter((q) => types.includes(q.type));
   const byDisc = {};
   for (const q of filtered) {
@@ -38,14 +52,23 @@ function pickProportional(pool, types, total) {
 }
 
 /**
- * Build an exam ticket: 5 closed + 5 matching/sequence + 4 open,
- * proportional across disciplines where possible.
+ * Сборка экзаменационного билета по новому формату (22 задания):
+ *   — multi:            EXAM_TICKET.multiMin..multiMax (случайно)
+ *   — matching+sequence: EXAM_TICKET.setCount
+ *   — open:              EXAM_TICKET.openCount
+ *   — single:            добивается до EXAM_TICKET.total
+ * Пропорционально по дисциплинам, где возможно.
  */
 export function buildExamTicket(allQuestions) {
-  const closed = pickProportional(allQuestions, ["single", "multi"], 5);
-  const set = pickProportional(allQuestions, ["matching", "sequence"], 5);
-  const open = pickProportional(allQuestions, ["open"], 4);
-  return [...closed, ...set, ...open];
+  const t = EXAM_TICKET;
+  const multiCount =
+    t.multiMin + Math.floor(Math.random() * (t.multiMax - t.multiMin + 1));
+  const set    = pickProportional(allQuestions, ["matching", "sequence"], t.setCount);
+  const multi  = pickProportional(allQuestions, ["multi"], multiCount);
+  const open   = pickProportional(allQuestions, ["open"], t.openCount);
+  const singleCount = Math.max(0, t.total - set.length - multi.length - open.length);
+  const single = pickProportional(allQuestions, ["single"], singleCount);
+  return [...single, ...multi, ...set, ...open];
 }
 
 export const useExamStore = defineStore("exam", {
@@ -89,18 +112,20 @@ export const useExamStore = defineStore("exam", {
       this.startedAt = Date.now();
       this.durationS = EXAM_DURATION_S;
       this.showFeedback = false;
-      this.sourceLabel = "Экзамен (14 заданий, 90 минут)";
+      this.sourceLabel = `Экзамен (${ticket.length} заданий, 90 минут)`;
     },
 
     startTraining(disciplineNum, types) {
       const qs = useQuestionsStore();
-      let pool = qs.all;
+      // Открытые задания на экзамене не встречаются — выкидываем из тренировки,
+      // даже если они каким-то образом окажутся в `types`.
+      const effectiveTypes = (types && types.length ? types : EXAM_TYPES)
+        .filter((t) => EXAM_TYPES.includes(t));
+      let pool = qs.examPool;
       if (disciplineNum) {
         pool = pool.filter((q) => q.discipline_num === Number(disciplineNum));
       }
-      if (types && types.length) {
-        pool = pool.filter((q) => types.includes(q.type));
-      }
+      pool = pool.filter((q) => effectiveTypes.includes(q.type));
       this.$reset();
       this.mode = "training";
       this.questions = shuffle(pool);
@@ -114,7 +139,9 @@ export const useExamStore = defineStore("exam", {
 
     startMistakes(ids) {
       const qs = useQuestionsStore();
-      const pool = ids.map((id) => qs.byId[id]).filter(Boolean);
+      const pool = ids
+        .map((id) => qs.byId[id])
+        .filter((q) => q && EXAM_TYPES.includes(q.type));
       this.$reset();
       this.mode = "mistakes";
       this.questions = shuffle(pool);
@@ -125,7 +152,9 @@ export const useExamStore = defineStore("exam", {
 
     startSrs(ids) {
       const qs = useQuestionsStore();
-      const pool = ids.map((id) => qs.byId[id]).filter(Boolean);
+      const pool = ids
+        .map((id) => qs.byId[id])
+        .filter((q) => q && EXAM_TYPES.includes(q.type));
       this.$reset();
       this.mode = "srs";
       this.questions = shuffle(pool);

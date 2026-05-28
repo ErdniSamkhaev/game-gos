@@ -15,13 +15,17 @@ const srs = useSrsStore();
 const setupOpen = ref(true);
 const checked = ref(false);
 
+// Открытые задания на экзамене не встречаются — их старые «ошибки»
+// сюда не подтягиваем (на экзамене не пригодятся).
 const mistakeQuestions = computed(() =>
-  progress.mistakeIds.map((id) => qs.byId[id]).filter(Boolean)
+  progress.mistakeIds
+    .map((id) => qs.byId[id])
+    .filter((q) => q && qs.isExamQuestion(q.id))
 );
 
 function start() {
   if (mistakeQuestions.value.length === 0) return;
-  exam.startMistakes(progress.mistakeIds);
+  exam.startMistakes(mistakeQuestions.value.map((q) => q.id));
   setupOpen.value = false;
   checked.value = false;
 }

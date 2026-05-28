@@ -306,3 +306,41 @@ h3 { font-size: 18px; margin: 16px 0 8px; }
 }
 .theme-toggle:hover { background: var(--hover-bg); }
 .theme-toggle .icon { font-size: 16px; }
+
+/* ───────────────────────── Мобильная адаптация ───────────────────────── */
+@media (max-width: 600px) {
+  .container { padding: 14px; }
+
+  h1 { font-size: 23px; }
+  h2 { font-size: 19px; }
+  h3 { font-size: 16px; }
+
+  .card { padding: 14px; border-radius: 10px; margin-bottom: 12px; }
+
+  /* Навигация — компактная липкая полоса с горизонтальной прокруткой,
+     чтобы не занимать пол-экрана на телефоне. */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    gap: 4px;
+    padding: 8px 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { white-space: nowrap; padding: 6px 9px; font-size: 13px; }
+  .theme-toggle { margin-left: 4px; flex: 0 0 auto; }
+
+  .statement { font-size: 16px; }
+  .option { padding: 12px; }
+  .score-big { font-size: 48px; }
+
+  /* 16px у полей ввода отключает авто-зум Safari на iOS при фокусе. */
+  .input, .textarea, select.input { font-size: 16px; }
+
+  /* Кнопки на всю ширину контейнера, когда стоят в одиночном ряду. */
+  .btn { padding: 11px 16px; }
+}

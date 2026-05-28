@@ -95,6 +95,26 @@ export const useProgressStore = defineStore("progress", {
       this.persist();
     },
 
+    /**
+     * Выкидывает из mistakes/wrongStreak/answeredCorrect все id, для которых
+     * predicate(id) вернул false. Используется для миграции (после того как
+     * мы выключили open-задания — старые записи по ним больше не нужны).
+     */
+    purgeIds(predicate) {
+      if (!this.wrongStreak) this.wrongStreak = {};
+      let changed = false;
+      for (const id of Object.keys(this.answeredWrong)) {
+        if (!predicate(id)) { delete this.answeredWrong[id]; changed = true; }
+      }
+      for (const id of Object.keys(this.answeredCorrect)) {
+        if (!predicate(id)) { delete this.answeredCorrect[id]; changed = true; }
+      }
+      for (const id of Object.keys(this.wrongStreak)) {
+        if (!predicate(id)) { delete this.wrongStreak[id]; changed = true; }
+      }
+      if (changed) this.persist();
+    },
+
     reset() {
       Object.assign(this.$state, {
         answeredCorrect: {},

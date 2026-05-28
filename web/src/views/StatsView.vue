@@ -10,7 +10,8 @@ const srs = useSrsStore();
 
 const perDiscipline = computed(() => {
   const map = {};
-  for (const q of qs.all) {
+  // Считаем только по тем заданиям, которые реально будут на экзамене.
+  for (const q of qs.examPool) {
     const k = q.discipline_num;
     if (!map[k]) {
       map[k] = { num: k, name: q.discipline_name, total: 0, correct: 0, wrong: 0 };

@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useQuestionsStore } from "@/stores/questions";
 
 const KEY = "game-gos:srs:v1";
 const DAY = 86400000;
@@ -60,6 +61,9 @@ export const useSrsStore = defineStore("srs", {
       } catch (_) {}
     },
     grade(questionId, quality) {
+      // Открытые задания на экзамене не встречаются, не плодим по ним карточки.
+      const qs = useQuestionsStore();
+      if (!qs.isExamQuestion(questionId)) return;
       const card = this.cards[questionId];
       this.cards[questionId] = review(card, quality);
       this.persist();
@@ -71,6 +75,18 @@ export const useSrsStore = defineStore("srs", {
     forget(questionId) {
       delete this.cards[questionId];
       this.persist();
+    },
+    /** Удалить все карточки по неэкзаменационным заданиям (старые open). */
+    purgeNonExam() {
+      const qs = useQuestionsStore();
+      let changed = false;
+      for (const id of Object.keys(this.cards)) {
+        if (!qs.isExamQuestion(id)) {
+          delete this.cards[id];
+          changed = true;
+        }
+      }
+      if (changed) this.persist();
     },
   },
 });

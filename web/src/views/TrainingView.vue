@@ -14,7 +14,8 @@ const srs = useSrsStore();
 
 const setupOpen = ref(true);
 const selectedDiscipline = ref(null);
-const selectedTypes = ref(["single", "multi", "matching", "sequence", "open"]);
+// На экзамене открытых нет — в тренировке тоже не предлагаем.
+const selectedTypes = ref(["single", "multi", "matching", "sequence"]);
 const checked = ref(false);
 
 const ALL_TYPES = [
@@ -22,7 +23,6 @@ const ALL_TYPES = [
   { id: "multi", label: "Закрытые (несколько)" },
   { id: "matching", label: "Соответствие" },
   { id: "sequence", label: "Последовательность" },
-  { id: "open", label: "Открытые" },
 ];
 
 function start() {
@@ -84,7 +84,9 @@ function back() {
 }
 
 const totalCount = computed(() => {
-  let pool = qs.all;
+  // Считаем по тому же пулу, что и startTraining (без open),
+  // иначе число «В подборке» расходилось бы с фактическим набором.
+  let pool = qs.examPool;
   if (selectedDiscipline.value) {
     pool = pool.filter(q => q.discipline_num === Number(selectedDiscipline.value));
   }
@@ -115,7 +117,7 @@ function formatCorrect(q) {
           Все
         </span>
         <span
-          v-for="d in qs.disciplines"
+          v-for="d in qs.examDisciplines"
           :key="d.num"
           :class="['tab', selectedDiscipline === d.num ? 'active' : '']"
           @click="selectedDiscipline = d.num"

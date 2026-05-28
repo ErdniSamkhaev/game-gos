@@ -36,9 +36,10 @@ const currentMistakeCount = computed(() =>
 );
 
 const ticketSummary = computed(() => {
-  const counts = { closed: 0, set: 0, open: 0 };
+  const counts = { single: 0, multi: 0, set: 0, open: 0 };
   for (const q of exam.questions) {
-    if (q.type === "single" || q.type === "multi") counts.closed += 1;
+    if (q.type === "single") counts.single += 1;
+    else if (q.type === "multi") counts.multi += 1;
     else if (q.type === "matching" || q.type === "sequence") counts.set += 1;
     else if (q.type === "open") counts.open += 1;
   }
@@ -129,6 +130,7 @@ function gradeAllAndFinalize() {
         :self-grade="currentSelfGrade"
         :show-feedback="false"
         :mistake-count="currentMistakeCount"
+        :allow-hints="false"
         @update:answer="currentAnswer = $event"
         @update:self-grade="currentSelfGrade = $event"
       />
@@ -137,9 +139,10 @@ function gradeAllAndFinalize() {
     <div class="row between wrap">
       <button class="btn" :disabled="exam.index === 0" @click="exam.prev()">← Назад</button>
       <div class="muted" style="font-size: 13px;">
-        Закрытых: {{ ticketSummary.closed }} ·
-        Соответствие: {{ ticketSummary.set }} ·
-        Открытых: {{ ticketSummary.open }}
+        Одиночных: {{ ticketSummary.single }} ·
+        Множ. ответ: {{ ticketSummary.multi }} ·
+        Соответствие: {{ ticketSummary.set }}<span v-if="ticketSummary.open > 0">
+        · Открытых: {{ ticketSummary.open }}</span>
       </div>
       <button
         v-if="exam.index < exam.questions.length - 1"
