@@ -19,7 +19,10 @@ const router = useRouter();
 const showSelfGradeModal = ref(false);
 
 onMounted(() => {
-  if (exam.mode !== "exam" || !exam.questions.length) {
+  // Стартуем новый билет, если экзамена ещё нет ИЛИ предыдущий уже завершён.
+  // Без проверки exam.finished заход на /exam после завершения показывал бы
+  // тот же законченный билет (последний вопрос), и начать новый было нельзя.
+  if (exam.mode !== "exam" || !exam.questions.length || exam.finished) {
     exam.startExam();
   }
 });
