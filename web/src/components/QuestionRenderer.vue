@@ -12,6 +12,7 @@ const props = defineProps({
   selfGrade: { type: Number, default: null },
   showFeedback: { type: Boolean, default: false },
   locked: { type: Boolean, default: false },
+  mistakeCount: { type: Number, default: 0 },
 });
 defineEmits(["update:answer", "update:selfGrade"]);
 
@@ -85,6 +86,7 @@ const worst = computed(() => highestLevel(issues.value));
       :self-grade="selfGrade"
       :show-feedback="showFeedback"
       :locked="locked"
+      :mistake-count="mistakeCount"
       @update:model-value="$emit('update:answer', $event)"
       @update:self-grade="$emit('update:selfGrade', $event)"
     />

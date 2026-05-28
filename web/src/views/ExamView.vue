@@ -31,6 +31,9 @@ const currentSelfGrade = computed({
   get: () => exam.selfGraded[exam.current?.id] ?? null,
   set: (v) => exam.setSelfGrade(exam.current.id, v),
 });
+const currentMistakeCount = computed(() =>
+  exam.current ? progress.mistakeCount(exam.current.id) : 0,
+);
 
 const ticketSummary = computed(() => {
   const counts = { closed: 0, set: 0, open: 0 };
@@ -58,7 +61,7 @@ function finish() {
 function finalize() {
   const breakdown = exam.questions.map((q) => {
     const grade = gradeAnswer(q, exam.answers[q.id], exam.selfGraded[q.id]);
-    progress.recordAnswer(q.id, grade.correct, grade.score);
+    progress.recordAnswer(q.id, grade.correct, grade.score, grade.max);
     if (q.type !== "open") {
       srs.autoGrade(q.id, grade.correct);
     } else {
@@ -125,6 +128,7 @@ function gradeAllAndFinalize() {
         :answer="currentAnswer"
         :self-grade="currentSelfGrade"
         :show-feedback="false"
+        :mistake-count="currentMistakeCount"
         @update:answer="currentAnswer = $event"
         @update:self-grade="currentSelfGrade = $event"
       />

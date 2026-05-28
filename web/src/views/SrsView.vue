@@ -35,13 +35,17 @@ const grade = computed(() => {
   return gradeAnswer(exam.current, exam.answers[exam.current.id], exam.selfGraded[exam.current.id]);
 });
 
+const currentMistakeCount = computed(() =>
+  exam.current ? progress.mistakeCount(exam.current.id) : 0,
+);
+
 function check() {
   const q = exam.current;
   if (!q) return;
   if (q.type === "open" && (exam.selfGraded[q.id] === undefined || exam.selfGraded[q.id] === null)) return;
   checked.value = true;
   const g = gradeAnswer(q, exam.answers[q.id], exam.selfGraded[q.id]);
-  progress.recordAnswer(q.id, g.correct, g.score);
+  progress.recordAnswer(q.id, g.correct, g.score, g.max);
   if (q.type === "open") {
     const map = { 0: 0, 1: 3, 2: 5 };
     srs.grade(q.id, map[exam.selfGraded[q.id]] ?? 0);
@@ -129,6 +133,7 @@ function formatCorrect(q) {
         :self-grade="currentSelfGrade"
         :show-feedback="checked"
         :locked="checked"
+        :mistake-count="currentMistakeCount"
         @update:answer="currentAnswer = $event"
         @update:self-grade="currentSelfGrade = $event"
       />
