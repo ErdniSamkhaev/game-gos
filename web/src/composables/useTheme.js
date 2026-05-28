@@ -22,7 +22,8 @@ function loadMode() {
     const v = localStorage.getItem(KEY);
     if (v && VALID.includes(v)) return v;
   } catch (_) {}
-  return "auto";
+  // По умолчанию — тёмная тема (основной задуманный вид приложения).
+  return "dark";
 }
 
 function persistMode(m) {

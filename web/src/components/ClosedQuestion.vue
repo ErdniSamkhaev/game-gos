@@ -46,8 +46,8 @@ function classFor(key) {
       :class="classFor(opt.key)"
       @click="toggle(opt.key)"
     >
-      <span class="option-key">{{ opt.key }})</span>
-      <span>{{ opt.text }}</span>
+      <span class="option-key">{{ opt.key }}</span>
+      <span class="option-text">{{ opt.text }}</span>
     </div>
   </div>
 </template>

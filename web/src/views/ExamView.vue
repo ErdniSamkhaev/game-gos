@@ -7,6 +7,7 @@ import { useProgressStore } from "@/stores/progress";
 import { useSrsStore } from "@/stores/srs";
 import { gradeAnswer, maxScoreFor } from "@/lib/grading";
 import QuestionRenderer from "@/components/QuestionRenderer.vue";
+import ProgressDots from "@/components/ProgressDots.vue";
 import Timer from "@/components/Timer.vue";
 
 const exam = useExamStore();
@@ -118,9 +119,7 @@ function gradeAllAndFinalize() {
       />
     </div>
 
-    <div class="bar" style="margin-bottom: 16px;">
-      <div class="bar-fill" :style="{ width: ((exam.index + 1) / exam.questions.length * 100) + '%' }"></div>
-    </div>
+    <ProgressDots :total="exam.questions.length" :index="exam.index" style="margin-bottom: 16px;" />
 
     <div class="card">
       <QuestionRenderer

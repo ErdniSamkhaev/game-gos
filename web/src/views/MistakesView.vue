@@ -6,6 +6,7 @@ import { useProgressStore } from "@/stores/progress";
 import { useSrsStore } from "@/stores/srs";
 import { gradeAnswer } from "@/lib/grading";
 import QuestionRenderer from "@/components/QuestionRenderer.vue";
+import ProgressDots from "@/components/ProgressDots.vue";
 
 const exam = useExamStore();
 const qs = useQuestionsStore();
@@ -117,9 +118,7 @@ function formatCorrect(q) {
       <button class="btn" @click="back">Закрыть</button>
     </div>
 
-    <div class="bar" style="margin-bottom: 16px;">
-      <div class="bar-fill" :style="{ width: ((exam.index + 1) / exam.questions.length * 100) + '%' }"></div>
-    </div>
+    <ProgressDots :total="exam.questions.length" :index="exam.index" style="margin-bottom: 16px;" />
 
     <div class="card">
       <QuestionRenderer

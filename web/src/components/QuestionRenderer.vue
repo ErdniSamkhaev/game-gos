@@ -24,10 +24,9 @@ const worst = computed(() => highestLevel(issues.value));
 
 <template>
   <div>
-    <div class="row" style="gap: 8px; margin-bottom: 8px;">
+    <div class="row wrap" style="gap: 8px; margin-bottom: 12px;">
+      <span class="pill category">{{ question.discipline_name }}</span>
       <span :class="['pill', question.type]">{{ question.type }}</span>
-      <span class="pill">Дисц. {{ question.discipline_num }}</span>
-      <span class="muted" style="font-size: 13px;">{{ question.discipline_name }}</span>
     </div>
 
     <div

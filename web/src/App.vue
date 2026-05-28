@@ -41,7 +41,7 @@ const themeTitle = computed(
 
 <template>
   <nav class="nav">
-    <RouterLink to="/">Главная</RouterLink>
+    <RouterLink to="/" class="nav-brand"><span class="logo">Г</span>ГОСы</RouterLink>
     <RouterLink to="/exam">Экзамен</RouterLink>
     <RouterLink to="/training">Тренировка</RouterLink>
     <RouterLink to="/srs">
