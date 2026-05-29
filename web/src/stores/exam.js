@@ -171,6 +171,19 @@ export const useExamStore = defineStore("exam", {
       this.selfGraded[id] = grade;
     },
 
+    /**
+     * Вернуть текущую карточку в конец очереди, чтобы повторить её сегодня
+     * (поведение «Again» как в Anki). Старый ответ сбрасываем, чтобы вопрос
+     * открылся чистым.
+     */
+    requeueCurrent() {
+      const q = this.current;
+      if (!q) return;
+      this.questions.push(q);
+      delete this.answers[q.id];
+      delete this.selfGraded[q.id];
+    },
+
     next() {
       if (this.index < this.questions.length - 1) {
         this.index += 1;
