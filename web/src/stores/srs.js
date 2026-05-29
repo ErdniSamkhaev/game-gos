@@ -21,15 +21,25 @@ const DAY = 86400000;
 function review(card, q) {
   let { interval = 0, efactor = 2.5, reps = 0 } = card || {};
   if (q < 3) {
+    // Не знал — карточка остаётся на сегодня и доступна к повторению сразу
+    // (как в «Работе над ошибками»). Вперёд по интервалам уйдёт только после
+    // правильного ответа.
     reps = 0;
-    interval = 1;
-  } else {
-    if (reps === 0) interval = 1;
-    else if (reps === 1) interval = 3;
-    else interval = Math.round(interval * efactor);
-    reps += 1;
-    efactor = Math.max(1.3, efactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
+    interval = 0;
+    return {
+      interval,
+      efactor,
+      reps,
+      dueAt: Date.now(),
+      lastQuality: q,
+      lastReviewedAt: Date.now(),
+    };
   }
+  if (reps === 0) interval = 1;
+  else if (reps === 1) interval = 3;
+  else interval = Math.round(interval * efactor);
+  reps += 1;
+  efactor = Math.max(1.3, efactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
   const dueAt = Date.now() + interval * DAY;
   return { interval, efactor, reps, dueAt, lastQuality: q, lastReviewedAt: Date.now() };
 }
